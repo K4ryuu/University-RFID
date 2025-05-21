@@ -1,9 +1,5 @@
-// Card management functions for RFID Card Management System
-
 function showCardManagementModal(e) {
     if (e) e.preventDefault();
-
-    // Tabs hozzáadása a különböző nézetekhez
     const cardsTable = `
         <div class="tabs">
             <div class="tab-header">
@@ -76,29 +72,23 @@ function showCardManagementModal(e) {
     showModal('Kártyák kezelése', cardsTable);
 
     setTimeout(() => {
-        // Ellenőrizzük a scrollbarokat a modal megjelenítése után
         if (typeof checkScrollbars === 'function') {
             checkScrollbars();
         }
         
-        // Tab kezelés
         document.querySelectorAll('.tab-btn').forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
 
-                // Tab gomb aktiválása
                 document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
 
-                // Tab tartalom megjelenítése
                 document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
                 document.getElementById(tabId).classList.add('active');
 
-                // Ha a lejáró kártyák tabra váltunk, betöltjük a lejáró kártyákat
                 if (tabId === 'expiring-cards') {
                     loadExpiringCardsTab();
                 } else {
-                    // Tab váltás után mindig ellenőrizzük a scrollbart
                     if (typeof checkScrollbars === 'function') {
                         setTimeout(checkScrollbars, 50);
                     }
@@ -106,7 +96,6 @@ function showCardManagementModal(e) {
             });
         });
 
-        // "Összes kártya" tab eseménykezelői
         document.getElementById('add-card-btn').addEventListener('click', showCardRegistrationModal);
 
         document.querySelectorAll('.edit-card').forEach(button => {
@@ -152,12 +141,10 @@ function showCardManagementModal(e) {
             });
         });
 
-        // "Lejáró kártyák" tab eseménykezelői
         document.getElementById('refresh-expiring-btn')?.addEventListener('click', () => {
             loadExpiringCardsTab();
         });
         
-        // Kártyakeresés beállítása - "Összes kártya" tab
         const cardSearchInput = document.getElementById('card-search');
         if (cardSearchInput) {
             cardSearchInput.addEventListener('input', (e) => {
@@ -190,11 +177,9 @@ function showCardManagementModal(e) {
                     
                     if (isVisible) hasVisibleRows = true;
                     
-                    // Ha nincs keresési szöveg, visszaállítjuk az eredeti szöveget
                     if (searchText === '') {
                         cardIdCell.innerHTML = cardIdCell.textContent;
                         userCell.innerHTML = userCell.textContent;
-                        // A státusz cellában megőrizzük a badge-et
                         const badge = statusCell.querySelector('.badge');
                         if (badge) {
                             statusCell.innerHTML = '';
@@ -204,11 +189,9 @@ function showCardManagementModal(e) {
                         }
                         expiryCell.innerHTML = expiryCell.textContent;
                     } else {
-                        // Kiemeljük a keresett szöveget
                         cardIdCell.innerHTML = highlightText(cardIdCell.textContent, searchText);
                         userCell.innerHTML = highlightText(userCell.textContent, searchText);
                         
-                        // A státusz cellában megőrizzük a badge-et
                         const badge = statusCell.querySelector('.badge');
                         if (badge) {
                             const badgeText = badge.textContent;
@@ -222,7 +205,6 @@ function showCardManagementModal(e) {
                     }
                 });
                 
-                // Nincs találat üzenet megjelenítése
                 let noResultsMessage = table.parentNode.querySelector('.no-results');
                 if (!hasVisibleRows && searchText !== '') {
                     if (!noResultsMessage) {
@@ -236,20 +218,17 @@ function showCardManagementModal(e) {
                     noResultsMessage.style.display = 'none';
                 }
                 
-                // Scrollbar ellenőrzése a keresés után
                 if (typeof checkScrollbars === 'function') {
                     setTimeout(checkScrollbars, 50);
                 }
             });
         }
         
-        // Kártyakeresés beállítása a lejáró kártyák fülhöz
         const expiringCardSearchInput = document.getElementById('expiring-card-search');
         if (expiringCardSearchInput) {
             expiringCardSearchInput.addEventListener('input', (e) => {
                 const searchText = e.target.value.toLowerCase();
                 
-                // A keresés csak akkor működik, ha már betöltődtek a lejáró kártyák
                 const table = document.querySelector('#tab-expiring-container table');
                 if (!table) return;
                 
@@ -278,13 +257,11 @@ function showCardManagementModal(e) {
                     
                     if (isVisible) hasVisibleRows = true;
                     
-                    // Ha nincs keresési szöveg, visszaállítjuk az eredeti szöveget
                     if (searchText === '') {
                         userCell.innerHTML = userCell.textContent;
                         cardIdCell.innerHTML = cardIdCell.textContent;
                         expiryCell.innerHTML = expiryCell.textContent;
                         
-                        // A napok cellában megőrizzük a badge-et
                         const badge = daysCell.querySelector('.badge');
                         if (badge) {
                             daysCell.innerHTML = '';
@@ -293,12 +270,10 @@ function showCardManagementModal(e) {
                             daysCell.innerHTML = daysCell.textContent;
                         }
                     } else {
-                        // Kiemeljük a keresett szöveget
                         userCell.innerHTML = highlightText(userCell.textContent, searchText);
                         cardIdCell.innerHTML = highlightText(cardIdCell.textContent, searchText);
                         expiryCell.innerHTML = highlightText(expiryCell.textContent, searchText);
                         
-                        // A napok cellában megőrizzük a badge-et
                         const badge = daysCell.querySelector('.badge');
                         if (badge) {
                             const badgeText = badge.textContent;
@@ -310,7 +285,6 @@ function showCardManagementModal(e) {
                     }
                 });
                 
-                // Nincs találat üzenet megjelenítése
                 const container = document.getElementById('tab-expiring-container');
                 let noResultsMessage = container.querySelector('.no-results');
                 
@@ -326,7 +300,6 @@ function showCardManagementModal(e) {
                     noResultsMessage.style.display = 'none';
                 }
                 
-                // Scrollbar ellenőrzése a keresés után
                 if (typeof checkScrollbars === 'function') {
                     setTimeout(checkScrollbars, 50);
                 }
@@ -349,17 +322,13 @@ async function showEditCardForm(cardId) {
 
         const card = await response.json();
 
-        // Fetch users for the dropdown
         await fetchUsers();
 
         const expiryDate = card.expiry_date ? new Date(card.expiry_date).toISOString().split('T')[0] : '';
 
-        // Szűrjük ki azokat a felhasználókat, akiknek már van kártyájuk, kivéve a jelenlegi kártya tulajdonosát
         const usersWithCards = cards
-            .filter(c => c.id !== card.id)  // Kihagyjuk a jelenlegi kártyát
             .map(c => c.user_id);
 
-        // Az elérhető felhasználók: akiknek nincs más kártyájuk, vagy ők a jelenlegi kártya tulajdonosai
         const availableUsers = users.filter(user =>
             !usersWithCards.includes(user.id) || user.id === card.user_id
         );
@@ -438,13 +407,11 @@ async function showEditCardForm(cardId) {
 function showCardRegistrationModal(e) {
     e.preventDefault();
 
-    // Ellenőrizzük, hogy vannak-e felhasználók a listában
     if (!users || users.length === 0) {
         alert('Nincsenek felhasználók a rendszerben. Először hozzon létre felhasználót!');
         return;
     }
 
-    // Szűrjük ki azokat a felhasználókat, akiknek már van kártyájuk
     const usersWithCards = cards.map(card => card.user_id);
     const availableUsers = users.filter(user => !usersWithCards.includes(user.id));
 
@@ -482,7 +449,6 @@ function showCardRegistrationModal(e) {
         const expiryDateElement = document.getElementById('expiry-date');
         const expiryDate = expiryDateElement.value ? new Date(expiryDateElement.value) : null;
 
-        // Részletes hibaellenőrzés
         if (!cardId) {
             alert('Kérjük, adja meg a kártya azonosítóját!');
             return;
@@ -634,7 +600,6 @@ function translateCardStatus(status) {
     return statusMap[status] || status;
 }
 
-// Lejáró kártyák tab betöltése
 async function loadExpiringCardsTab() {
     const container = document.getElementById('tab-expiring-container');
     if (!container) return;
@@ -659,10 +624,8 @@ async function loadExpiringCardsTab() {
             return;
         }
 
-        // Rendezzük a kártyákat a lejárat dátuma szerint
         expiringCards.sort((a, b) => new Date(a.expiry_date) - new Date(b.expiry_date));
 
-        // Táblázat létrehozása
         let tableHTML = `
             <div class="table-responsive">
                 <table id="expiring-cards-table">
@@ -685,7 +648,6 @@ async function loadExpiringCardsTab() {
 
             const userName = card.user ? `${card.user.first_name} ${card.user.last_name}` : 'Ismeretlen';
 
-            // Osztályozás a hátralévő napok száma alapján
             let rowClass = '';
             if (daysRemaining <= 7) {
                 rowClass = 'urgent-row';
@@ -712,7 +674,6 @@ async function loadExpiringCardsTab() {
 
         container.innerHTML = tableHTML;
 
-        // Eseménykezelők hozzáadása
         document.querySelectorAll('.extend-card-tab').forEach(button => {
             button.addEventListener('click', () => {
                 const cardId = button.getAttribute('data-id');
@@ -736,30 +697,23 @@ async function loadExpiringCardsTab() {
             });
         });
         
-        // Ellenőrizzük a scrollbart, amikor a táblázat beillesztve
-        // Két időpontban ellenőrizzük: azonnal, és kis késleltetéssel is (tartalmi betöltés után)
         if (typeof checkScrollbars === 'function') {
             checkScrollbars();
             setTimeout(checkScrollbars, 100);
         }
         
-        // Aktiváljuk a keresést az új betöltött táblázatra
         const searchInput = document.getElementById('expiring-card-search');
         if (searchInput && searchInput.value) {
-            // Ha már van keresési érték, alkalmazzuk azt
             searchInput.dispatchEvent(new Event('input'));
         }
 
     } catch (error) {
-        // Console.error eltávolítva
         container.innerHTML = '<p class="error-message">Hiba történt a lejáró kártyák betöltése közben.</p>';
     }
 }
 
-// Kártya hosszabbítás űrlap megjelenítése
 async function showExtendCardForm(cardId) {
     try {
-        // Kártya adatainak betöltése
         const response = await fetch(`/api/cards/${cardId}`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -773,11 +727,9 @@ async function showExtendCardForm(cardId) {
         const card = await response.json();
         const currentExpiry = card.expiry_date ? new Date(card.expiry_date) : new Date();
 
-        // Alapértelmezett új lejárat: 1 év a mostani dátumtól
         const defaultNewExpiry = new Date();
         defaultNewExpiry.setFullYear(defaultNewExpiry.getFullYear() + 1);
 
-        // Formátum konverzió az input mezőhöz (YYYY-MM-DD)
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -860,18 +812,15 @@ async function showExtendCardForm(cardId) {
                 alert('Kártya sikeresen hosszabbítva!');
                 hideModal();
 
-                // Frissítsük a kártyákat és a lejáró kártyák listáját
                 await Promise.all([
                     fetchCards(),
                     loadExpiringCardsTab()
                 ]);
 
-                // Frissítsük a dashboard-ot is, ha van rajta lejáró kártyák lista
                 if (typeof fetchExpiringCards === 'function') {
                     fetchExpiringCards();
                 }
 
-                // Frissítsük a kártyák kezelése modalt
                 showCardManagementModal();
             } catch (error) {
                 alert('Hiba történt: ' + error.message);

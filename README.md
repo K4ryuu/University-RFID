@@ -1,5 +1,7 @@
 # Egyetemi RFID Beléptető Rendszer
 
+![Főoldal és Irányítópult](https://github.com/K4ryuu/University-RFID/raw/main/showcase/image2.png)
+
 Ez a projekt egy egyetemi feladatként készült RFID-alapú beléptető rendszer, amely lehetővé teszi az egyetemi helyiségekhez való hozzáférés szabályozását RFID kártyák segítségével.
 
 ## A projekt célja
@@ -11,6 +13,10 @@ Az RFID Beléptető Rendszer egy olyan megoldás, amely:
 - Naplózza a belépési eseményeket
 - Csoportalapú hozzáférés-kezelést tesz lehetővé
 - Valós idejű monitorozást biztosít websocket kapcsolaton keresztül
+
+## Képernyőképek
+
+A projekt képernyőképei a `showcase` mappában találhatók, ahol 12 kép mutatja be a rendszer különböző funkcióit (belépés, kártyakezelés, jogosultságkezelés, felhasználói felület, stb.).
 
 ## Funkciók
 
@@ -30,6 +36,17 @@ Az RFID Beléptető Rendszer egy olyan megoldás, amely:
 - **Adatbázis**: Konfigurálható (alapértelmezetten SQLite)
 - **Biztonság**: JWT token alapú autentikáció, API-kulcs védelem
 - **RFID**: RFID olvasók integrációja
+
+## Vizuális Dokumentáció
+
+A `showcase` mappában található képek a rendszer különböző funkcióit mutatják be, köztük:
+
+- Bejelentkezési képernyő
+- Felhasználók és kártyák kezelése
+- Jogosultságok beállítása
+- Termek adminisztrációja
+- Csoportkezelés
+- Tevékenységi napló és statisztikák
 
 ## Telepítés és Használat
 
@@ -55,7 +72,7 @@ A projekt struktúrája:
 
 ## Egyetemi Projekt Információ
 
-Ez a projekt oktatási célokra készült, amely demonstrálja a modern webalkalmazások fejlesztését, az RFID technológia integrációját, valamint a hozzáférés-vezérlési rendszerek működését.
+Ez a projekt beadandó kiegészítéséhez készült, amely demonstrálja az RFID technológia integrációját, valamint működését.
 
 ## Licensz
 

@@ -10,11 +10,9 @@ import (
 	"rfid/internal/websocket"
 )
 
-// SetupRouter configures all routes for the application
 func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 	router := gin.Default()
 
-	// Create handlers
 	authHandler := handlers.NewAuthHandler(db)
 	userHandler := handlers.NewUserHandler(db)
 	cardHandler := handlers.NewCardHandler(db)
@@ -24,43 +22,34 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 	simulationHandler := handlers.NewSimulationHandler(db)
 	groupHandler := handlers.NewGroupHandler(db)
 
-	// Create WebSocket handler if enabled
 	var wsHandler *websocket.WebSocketHandler
 	if config.EnableWebsocket {
 		wsHandler = websocket.NewWebSocketHandler(db)
-		
-		// Pass WebSocket handler to card handler for notifications
+
 		cardHandler.SetWebSocketHandler(wsHandler)
 	}
 
-	// Create middleware
 	authMiddleware := middleware.NewAuthMiddleware(db)
 	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(db, config)
 
-	// Share app config with all contexts
 	router.Use(func(c *gin.Context) {
 		c.Set("config", config)
 		c.Next()
 	})
 
-	// Serve static files
 	router.Static("/static", "./web/static")
-	// Use path for templates
 	router.LoadHTMLGlob("./web/templates/*")
 
-	// Public routes
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", gin.H{
 			"title": "RFID Card Management System",
 		})
 	})
 
-	// WebSocket route if enabled
 	if config.EnableWebsocket {
 		router.GET("/ws", wsHandler.HandleWebSocket)
 	}
 
-	// Auth routes
 	auth := router.Group("/api/auth")
 	{
 		auth.POST("/login", authHandler.Login)
@@ -69,19 +58,15 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 		auth.POST("/change-password", authMiddleware.AuthRequired(), authHandler.ChangePassword)
 	}
 
-	// API routes conditionally enabled
 	if config.EnableRESTAPI {
 		api := router.Group("/api")
-		
-		// Apply API key middleware only if it's required
+
 		if config.APIKeyRequired {
 			api.Use(apiKeyMiddleware.APIKeyRequired())
 		}
-		
-		// Apply authentication middleware
+
 		api.Use(authMiddleware.AuthRequired())
 		{
-			// User routes (admin only)
 			users := api.Group("/users")
 			users.Use(authMiddleware.AdminRequired())
 			{
@@ -93,7 +78,6 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 				users.GET("/:id/cards", userHandler.GetUserCards)
 			}
 
-			// Card routes (admin only)
 			cards := api.Group("/cards")
 			cards.Use(authMiddleware.AdminRequired())
 			{
@@ -108,7 +92,6 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 				cards.GET("/expiring", cardHandler.GetExpiringCards)
 			}
 
-			// Room routes (admin only)
 			rooms := api.Group("/rooms")
 			rooms.Use(authMiddleware.AdminRequired())
 			{
@@ -121,7 +104,6 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 				rooms.GET("/:id/logs", roomHandler.GetRoomLogs)
 			}
 
-			// Permission routes (admin only)
 			permissions := api.Group("/permissions")
 			permissions.Use(authMiddleware.AdminRequired())
 			{
@@ -133,15 +115,13 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 				permissions.POST("/:id/revoke", permissionHandler.RevokePermission)
 			}
 
-			// Log routes (admin only)
 			logs := api.Group("/logs")
 			logs.Use(authMiddleware.AdminRequired())
 			{
 				logs.GET("", logHandler.GetLogs)
 				logs.GET("/:id", logHandler.GetLog)
-				logs.POST("", logHandler.CreateLog) // Primarily for testing
+				logs.POST("", logHandler.CreateLog)
 
-				// Statistics endpoints
 				logs.GET("/stats/rooms", logHandler.GetRoomStats)
 				logs.GET("/stats/cards", logHandler.GetCardStats)
 				logs.GET("/stats/time-series", logHandler.GetAccessTimeSeries)
@@ -149,7 +129,6 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 				logs.GET("/stats/most-active-users", logHandler.GetMostActiveUsers)
 			}
 
-			// Group routes (admin only)
 			groups := api.Group("/groups")
 			groups.Use(authMiddleware.AdminRequired())
 			{
@@ -159,21 +138,17 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 				groups.PUT("/:id", groupHandler.UpdateGroup)
 				groups.DELETE("/:id", groupHandler.DeleteGroup)
 
-				// Group user management
 				groups.GET("/:id/users", groupHandler.GetGroupUsers)
 				groups.POST("/:id/users", groupHandler.AddUserToGroup)
 				groups.DELETE("/:id/users/:user_id", groupHandler.RemoveUserFromGroup)
 
-				// Group room management
 				groups.GET("/:id/rooms", groupHandler.GetGroupRooms)
 				groups.POST("/:id/rooms", groupHandler.AddRoomToGroup)
 				groups.DELETE("/:id/rooms/:room_id", groupHandler.RemoveRoomFromGroup)
 			}
 
-			// Special access check endpoint (available to any device with valid credentials)
 			api.POST("/check-access", cardHandler.CheckAccess)
 
-			// Simulation endpoints
 			simulation := api.Group("/simulate")
 			simulation.Use(authMiddleware.AdminRequired())
 			{
@@ -182,12 +157,8 @@ func SetupRouter(db *gorm.DB, config *config.Config) *gin.Engine {
 		}
 	}
 
-	// Create a non-authenticated API endpoint for card readers
-	// This endpoint is available even if REST API is disabled
-	// It will use API key authentication if it's enabled
 	cardReader := router.Group("/reader")
 
-	// Apply API key middleware only if it's required
 	if config.APIKeyRequired {
 		cardReader.Use(apiKeyMiddleware.APIKeyRequired())
 	}

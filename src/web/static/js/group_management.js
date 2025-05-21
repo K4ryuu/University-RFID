@@ -1,5 +1,3 @@
-// Group management functions for RFID Card Management System
-
 function showGroupManagementModal(e) {
     e.preventDefault();
 
@@ -27,8 +25,8 @@ function showGroupManagementModal(e) {
                             <td>${group.description || 'Nincs leírás'}</td>
                             <td class="actions">
                                 <button class="edit-group" data-id="${group.id}">Szerkesztés</button>
+                                <button class="manage-members" data-id="${group.id}">Kezelés</button>
                                 <button class="delete-group" data-id="${group.id}">Törlés</button>
-                                <button class="manage-members" data-id="${group.id}">Tagok</button>
                             </td>
                         </tr>
                     `).join('')}
@@ -65,7 +63,6 @@ function showGroupManagementModal(e) {
             });
         });
 
-        // Keresés beállítása
         const searchInput = document.getElementById('group-search');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -90,18 +87,15 @@ function showGroupManagementModal(e) {
 
                     if (isVisible) hasVisibleRows = true;
 
-                    // Ha nincs keresési szöveg, visszaállítjuk az eredeti szöveget
                     if (searchText === '') {
                         nameCell.innerHTML = nameCell.textContent;
                         descriptionCell.innerHTML = descriptionCell.textContent;
                     } else {
-                        // Kiemeljük a keresett szöveget
                         nameCell.innerHTML = highlightText(nameCell.textContent, searchText);
                         descriptionCell.innerHTML = highlightText(descriptionCell.textContent, searchText);
                     }
                 });
 
-                // Nincs találat üzenet megjelenítése
                 let noResultsMessage = table.parentNode.querySelector('.no-results');
                 if (!hasVisibleRows && searchText !== '') {
                     if (!noResultsMessage) {
@@ -115,7 +109,6 @@ function showGroupManagementModal(e) {
                     noResultsMessage.style.display = 'none';
                 }
 
-                // Scrollbar ellenőrzése a keresés után
                 if (typeof checkScrollbars === 'function') {
                     setTimeout(checkScrollbars, 50);
                 }
@@ -153,9 +146,9 @@ function showAddGroupForm() {
         const description = document.getElementById('description').value;
         const parentGroupSelect = document.getElementById('parent-group');
         const parentId = parentGroupSelect.value ? Number(parentGroupSelect.value) : null;
-        const accessLevel = "restricted"; // Minden csoport csak restricted lehet
+        const accessLevel = "restricted";
 
-        // Részletes hibaellenőrzés
+
         if (!name) {
             alert('Kérjük, adja meg a csoport nevét!');
             return;
@@ -224,7 +217,7 @@ async function showEditGroupForm(groupId) {
                     <select id="parent-group" name="parent-group">
                         <option value="">Nincs szülő csoport</option>
                         ${groups
-                            .filter(g => g.id !== group.id) // Kizárjuk az aktuális csoportot
+                            .filter(g => g.id !== group.id)
                             .map(g => `<option value="${g.id}" ${group.parent_id && g.id === group.parent_id ? 'selected' : ''}>${g.name}</option>`)
                             .join('')}
                     </select>
@@ -238,9 +231,9 @@ async function showEditGroupForm(groupId) {
             const description = document.getElementById('description').value;
             const parentGroupSelect = document.getElementById('parent-group');
             const parentId = parentGroupSelect.value ? Number(parentGroupSelect.value) : null;
-            const accessLevel = "restricted"; // Minden csoport csak restricted lehet
+            const accessLevel = "restricted";
 
-            // Részletes hibaellenőrzés
+
             if (!name) {
                 alert('Kérjük, adja meg a csoport nevét!');
                 return;
@@ -305,7 +298,7 @@ async function deleteGroup(groupId) {
 
 async function showGroupMembersModal(groupId) {
     try {
-        // Lekérjük a csoport adatait
+
         const response = await fetch(`/api/groups/${groupId}?include_users=true&include_rooms=true`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -318,7 +311,7 @@ async function showGroupMembersModal(groupId) {
 
         const group = await response.json();
 
-        // Tabfüles UI a felhasználók és helyiségek között váltáshoz
+
         const membersContent = `
             <div class="tabs">
                 <div class="tab-header">
@@ -394,32 +387,32 @@ async function showGroupMembersModal(groupId) {
 
         showModal(`"${group.name}" csoport kezelése`, membersContent);
 
-        // Eseménykezelők beállítása
+
         setTimeout(() => {
-            // Tab funkciók
+
             document.querySelectorAll('.tab-btn').forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // Aktív tab frissítése
+
                     document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
 
-                    // Aktív tartalom frissítése
+
                     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
                     document.getElementById(`${tab.getAttribute('data-tab')}-tab`).classList.add('active');
                 });
             });
 
-            // Felhasználó hozzáadása gomb
+
             document.getElementById('add-user-to-group-btn').addEventListener('click', () => {
                 showAddUserToGroupForm(groupId);
             });
 
-            // Helyiség hozzáadása gomb
+
             document.getElementById('add-room-to-group-btn').addEventListener('click', () => {
                 showAddRoomToGroupForm(groupId);
             });
 
-            // Felhasználó eltávolítása gombok
+
             document.querySelectorAll('.remove-user-from-group').forEach(button => {
                 button.addEventListener('click', async () => {
                     const userId = button.getAttribute('data-user-id');
@@ -429,7 +422,7 @@ async function showGroupMembersModal(groupId) {
                 });
             });
 
-            // Helyiség eltávolítása gombok
+
             document.querySelectorAll('.remove-room-from-group').forEach(button => {
                 button.addEventListener('click', async () => {
                     const roomId = button.getAttribute('data-room-id');
@@ -446,7 +439,7 @@ async function showGroupMembersModal(groupId) {
 
 async function showAddUserToGroupForm(groupId) {
     try {
-        // Lekérjük a csoport adatait, hogy tudjuk, kik vannak már benne
+
         const groupResponse = await fetch(`/api/groups/${groupId}?include_users=true`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -459,7 +452,7 @@ async function showAddUserToGroupForm(groupId) {
 
         const group = await groupResponse.json();
 
-        // Leszűrjük azokat a felhasználókat, akik még nincsenek a csoportban
+
         const existingUserIds = group.users ? group.users.map(user => user.id) : [];
 
         const availableUsers = users.filter(user => !existingUserIds.includes(user.id));
@@ -525,7 +518,7 @@ async function showAddUserToGroupForm(groupId) {
 
 async function showAddRoomToGroupForm(groupId) {
     try {
-        // Lekérjük a csoport adatait, hogy tudjuk, mely helyiségek vannak már hozzárendelve
+
         const groupResponse = await fetch(`/api/groups/${groupId}?include_rooms=true`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -538,7 +531,7 @@ async function showAddRoomToGroupForm(groupId) {
 
         const group = await groupResponse.json();
 
-        // Leszűrjük azokat a helyiségeket, amelyek még nincsenek a csoporthoz rendelve
+
         const existingRoomIds = group.rooms ? group.rooms.map(room => room.id) : [];
 
         const availableRooms = rooms.filter(room => !existingRoomIds.includes(room.id));

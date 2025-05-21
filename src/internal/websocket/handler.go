@@ -44,12 +44,12 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	tokenString := c.Query("token")
 	if tokenString != "" {
 		jwtSecret := os.Getenv("JWT_SECRET")
-		
+
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("váratlan aláírási módszer: %v", token.Header["alg"])
 			}
-			
+
 			return []byte(jwtSecret), nil
 		})
 

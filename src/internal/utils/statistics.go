@@ -10,7 +10,6 @@ type StatisticsService struct {
 	db *gorm.DB
 }
 
-// NewStatisticsService creates a new instance of StatisticsService
 func NewStatisticsService(db *gorm.DB) *StatisticsService {
 	return &StatisticsService{
 		db: db,
@@ -22,7 +21,7 @@ type RoomUsageStats struct {
 	RoomName     string  `json:"room_name"`
 	TotalEntries int     `json:"total_entries"`
 	TotalDenials int     `json:"total_denials"`
-	AccessRate   float64 `json:"access_rate"` // Percentage of successful entries
+	AccessRate   float64 `json:"access_rate"`
 }
 
 type CardUsageStats struct {
@@ -38,11 +37,9 @@ type TimeSeriesData struct {
 	Count     int       `json:"count"`
 }
 
-// GetRoomUsageStats gets usage statistics for all rooms or a specific room
 func (ss *StatisticsService) GetRoomUsageStats(roomID uint, start, end time.Time) ([]RoomUsageStats, error) {
 	var stats []RoomUsageStats
 
-	// Build the query
 	query := ss.db.Table("logs").
 		Select("logs.room_id, rooms.name as room_name, "+
 			"COUNT(CASE WHEN logs.access_result = 'granted' THEN 1 END) as total_entries, "+
@@ -52,7 +49,6 @@ func (ss *StatisticsService) GetRoomUsageStats(roomID uint, start, end time.Time
 		Where("logs.timestamp BETWEEN ? AND ?", start, end).
 		Group("logs.room_id, rooms.name")
 
-	// Filter by room if specified
 	if roomID > 0 {
 		query = query.Where("logs.room_id = ?", roomID)
 	}
@@ -64,11 +60,9 @@ func (ss *StatisticsService) GetRoomUsageStats(roomID uint, start, end time.Time
 	return stats, nil
 }
 
-// GetCardUsageStats gets usage statistics for all cards or a specific card
 func (ss *StatisticsService) GetCardUsageStats(cardID uint, start, end time.Time) ([]CardUsageStats, error) {
 	var stats []CardUsageStats
 
-	// Build the query
 	query := ss.db.Table("logs").
 		Select("logs.card_id, "+
 			"CONCAT(users.first_name, ' ', users.last_name) as user_full_name, "+
@@ -80,7 +74,6 @@ func (ss *StatisticsService) GetCardUsageStats(cardID uint, start, end time.Time
 		Where("logs.timestamp BETWEEN ? AND ? AND logs.access_result = 'granted'", start, end).
 		Group("logs.card_id, users.first_name, users.last_name")
 
-	// Filter by card if specified
 	if cardID > 0 {
 		query = query.Where("logs.card_id = ?", cardID)
 	}
@@ -92,11 +85,9 @@ func (ss *StatisticsService) GetCardUsageStats(cardID uint, start, end time.Time
 	return stats, nil
 }
 
-// GetAccessTimeSeriesData gets time series data for accesses
 func (ss *StatisticsService) GetAccessTimeSeriesData(roomID uint, interval string, start, end time.Time) ([]TimeSeriesData, error) {
 	var data []TimeSeriesData
 
-	// Define time format based on interval
 	var timeFormat string
 	switch interval {
 	case "hour":
@@ -104,26 +95,23 @@ func (ss *StatisticsService) GetAccessTimeSeriesData(roomID uint, interval strin
 	case "day":
 		timeFormat = "2006-01-02 00:00:00"
 	case "week":
-		timeFormat = "2006-01-02" // This will need custom handling
+		timeFormat = "2006-01-02"
 	case "month":
 		timeFormat = "2006-01-01 00:00:00"
 	default:
-		timeFormat = "2006-01-02 15:00:00" // Default to hourly
+		timeFormat = "2006-01-02 15:00:00"
 	}
 
-	// Build query
 	query := ss.db.Table("logs").
 		Select("strftime(?, logs.timestamp) as timestamp_str, COUNT(*) as count", timeFormat).
 		Where("logs.timestamp BETWEEN ? AND ? AND logs.access_result = 'granted'", start, end).
 		Group("timestamp_str").
 		Order("timestamp_str")
 
-	// Filter by room if specified
 	if roomID > 0 {
 		query = query.Where("logs.room_id = ?", roomID)
 	}
 
-	// Get the data
 	type rawData struct {
 		TimestampStr string `gorm:"column:timestamp_str"`
 		Count        int    `gorm:"column:count"`
@@ -134,7 +122,6 @@ func (ss *StatisticsService) GetAccessTimeSeriesData(roomID uint, interval strin
 		return nil, err
 	}
 
-	// Convert string timestamps to time.Time
 	for _, r := range rawResults {
 		t, err := time.Parse(timeFormat, r.TimestampStr)
 		if err != nil {
@@ -150,7 +137,6 @@ func (ss *StatisticsService) GetAccessTimeSeriesData(roomID uint, interval strin
 	return data, nil
 }
 
-// GetMostAccessedRooms gets the most frequently accessed rooms
 func (ss *StatisticsService) GetMostAccessedRooms(limit int, start, end time.Time) ([]RoomUsageStats, error) {
 	var stats []RoomUsageStats
 
@@ -171,7 +157,6 @@ func (ss *StatisticsService) GetMostAccessedRooms(limit int, start, end time.Tim
 	return stats, nil
 }
 
-// GetMostActiveUsers gets the most active users
 func (ss *StatisticsService) GetMostActiveUsers(limit int, start, end time.Time) ([]struct {
 	UserID      uint   `json:"user_id"`
 	FullName    string `json:"full_name"`

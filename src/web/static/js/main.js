@@ -33,7 +33,6 @@ function init() {
     authToken = localStorage.getItem('authToken');
     if (authToken) {
         fetchCurrentUser();
-        // Inaktivitási időzítő indítása
         startInactivityTimer();
     }
 
@@ -55,23 +54,18 @@ function init() {
         yearElement.textContent = yearElement.textContent.replace('{{ .year }}', currentYear);
     }
 
-    // Felhasználói interakciók figyelése aktivitás nyilvántartásához
     document.addEventListener('click', updateLastActivity);
     document.addEventListener('keypress', updateLastActivity);
     document.addEventListener('mousemove', throttle(updateLastActivity, 60000)); // Csak 1 percenként frissítünk egérmozgásra
     document.addEventListener('scroll', throttle(updateLastActivity, 60000));    // Csak 1 percenként frissítünk görgetésre
 
-    // Scrollbar megjelenítése csak ha szükséges
     window.addEventListener('load', checkScrollbars);
     window.addEventListener('resize', checkScrollbars);
 
-    // MutationObserver beállítása a DOM változások figyelésére (táblázatok változása esetén)
     const observer = new MutationObserver((mutations) => {
-        // Csak akkor ellenőrizzük a scrollbarokat, ha a DOM változott
         let shouldCheckScrollbars = false;
 
         mutations.forEach(mutation => {
-            // Ha a subtree-ben történt változás vagy gyermek elemek hozzáadása/eltávolítása
             if (mutation.type === 'childList' ||
                 (mutation.type === 'attributes' && mutation.attributeName === 'style')) {
                 shouldCheckScrollbars = true;
@@ -79,12 +73,10 @@ function init() {
         });
 
         if (shouldCheckScrollbars) {
-            // Rövid késleltetéssel ellenőrizzük, hogy biztosan befejeződjön a DOM módosítás
             setTimeout(checkScrollbars, 100);
         }
     });
 
-    // Figyeljük a fő konténert a DOM változásokra
     observer.observe(document.querySelector('main'), {
         childList: true,
         subtree: true,
@@ -93,13 +85,10 @@ function init() {
     });
 }
 
-// Felhasználói aktivitás frissítése
 function updateLastActivity() {
     lastActivity = Date.now();
-    // Console.log eltávolítva
 }
 
-// Throttle segédfüggvény, hogy ne hívjuk túl gyakran az aktivitás frissítést
 function throttle(func, limit) {
     let inThrottle;
     return function() {
@@ -113,7 +102,6 @@ function throttle(func, limit) {
     };
 }
 
-// Inaktivitási időzítő indítása
 function startInactivityTimer() {
     if (inactivityTimer) {
         clearInterval(inactivityTimer);
@@ -123,17 +111,15 @@ function startInactivityTimer() {
         const currentTime = Date.now();
         const timeElapsed = currentTime - lastActivity;
 
-        // Ha a felhasználó már túl régóta inaktív
         if (timeElapsed >= SESSION_TIMEOUT) {
             clearInterval(inactivityTimer);
             inactivityTimer = null;
             showInactivityLogoutMessage();
             logout();
         }
-    }, 60000); // Percenként ellenőrzés
+    }, 60000);
 }
 
-// Inaktivitási figyelmeztetés megjelenítése
 function showInactivityLogoutMessage() {
     const timeoutMinutes = SESSION_TIMEOUT / 60000;
     alert(`Az Ön munkamenete ${timeoutMinutes} perc inaktivitás miatt automatikusan lezárult. Kérjük, jelentkezzen be újra.`);
@@ -146,7 +132,6 @@ async function handleLogin(e) {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    // Részletes validáció
     if (!username) {
         loginError.textContent = 'Kérjük, adja meg a felhasználónevét!';
         return;
@@ -175,7 +160,6 @@ async function handleLogin(e) {
         authToken = data.token;
         localStorage.setItem('authToken', authToken);
 
-        // A token beállítása után azonnal kérjük le a teljes felhasználói adatokat
         try {
             const userResponse = await fetch('/api/auth/me', {
                 headers: {
@@ -189,14 +173,12 @@ async function handleLogin(e) {
 
             const userData = await userResponse.json();
 
-            // Ellenőrizzük, hogy a kötelező mezők jelen vannak-e
             if (!userData || !userData.id) {
                 throw new Error('Érvénytelen felhasználói adatok a szervertől');
             }
 
             currentUser = userData;
 
-            // Frissítsük az aktivitási időt és indítsuk el az időzítőt
             updateLastActivity();
             startInactivityTimer();
 
@@ -204,10 +186,8 @@ async function handleLogin(e) {
             loadDashboardData();
         } catch (error) {
             console.error('Hiba a felhasználói adatok lekérésekor:', error);
-            // Ideiglenes felhasználói adatok, ha a /me hívás nem sikerül, de a token érvényes
             currentUser = data.user || { first_name: 'Ismeretlen', last_name: 'Felhasználó' };
 
-            // Frissítsük az aktivitási időt és indítsuk el az időzítőt
             updateLastActivity();
             startInactivityTimer();
 
@@ -237,7 +217,6 @@ async function fetchCurrentUser() {
 
         const userData = await response.json();
 
-        // Ellenőrizzük, hogy a kötelező mezők jelen vannak-e
         if (!userData || !userData.id) {
             console.error('Érvénytelen felhasználói adatok a szervertől', userData);
             logout();
@@ -258,7 +237,6 @@ function logout() {
     currentUser = null;
     localStorage.removeItem('authToken');
 
-    // Leállítjuk az inaktivitási időzítőt
     if (inactivityTimer) {
         clearInterval(inactivityTimer);
         inactivityTimer = null;
@@ -281,7 +259,6 @@ function showDashboard() {
 
 function updateAuthNav(isLoggedIn) {
     if (isLoggedIn && currentUser) {
-        // Ellenőrizzük, hogy a felhasználó adatok megfelelően be vannak-e töltve
         const firstName = currentUser.first_name || 'Ismeretlen';
         const lastName = currentUser.last_name || 'Felhasználó';
 
@@ -317,7 +294,6 @@ async function loadDashboardData() {
     }
 }
 
-// Adatbetöltő függvények
 async function fetchUsers() {
     try {
         const response = await fetch('/api/users', {
@@ -405,7 +381,6 @@ async function fetchGroups() {
 
 async function fetchDashboardStats() {
     try {
-        // Adatok lekérése
         await Promise.all([
             fetchUsers(),
             fetchCards(),
@@ -443,7 +418,6 @@ async function fetchRecentLogs() {
 
         logs = await response.json();
 
-        // Ensure logs is always an array
         if (!Array.isArray(logs)) {
             console.error('Expected logs to be an array, got:', typeof logs);
             logs = Array.isArray(logs) ? logs : [];
@@ -456,7 +430,6 @@ async function fetchRecentLogs() {
 }
 
 function renderRecentLogs(logs) {
-    // Clear the table first
     if (!recentLogsTable) {
         console.error('Recent logs table not found');
         return;
@@ -475,19 +448,15 @@ function renderRecentLogs(logs) {
         return;
     }
 
-    // Loop through the logs and create table rows
     logs.forEach((log, index) => {
         try {
-            // Create a new row for this log entry
             const row = document.createElement('tr');
-            // Hozzáadjuk a megfelelő osztályt a belépés eredménye alapján
             if (log.access_result === 'granted') {
                 row.classList.add('granted-row');
             } else {
                 row.classList.add('denied-row');
             }
 
-            // Time cell
             const timeCell = document.createElement('td');
             try {
                 const timestamp = new Date(log.timestamp || new Date());
@@ -498,7 +467,6 @@ function renderRecentLogs(logs) {
             }
             row.appendChild(timeCell);
 
-            // User cell
             const userCell = document.createElement('td');
             let userName = 'Ismeretlen';
 
@@ -511,7 +479,6 @@ function renderRecentLogs(logs) {
             userCell.textContent = userName;
             row.appendChild(userCell);
 
-            // Card ID cell
             const cardCell = document.createElement('td');
             if (log.card && log.card.card_id) {
                 cardCell.textContent = log.card.card_id;
@@ -520,7 +487,6 @@ function renderRecentLogs(logs) {
             }
             row.appendChild(cardCell);
 
-            // Room cell
             const roomCell = document.createElement('td');
             if (log.room && log.room.name) {
                 roomCell.textContent = log.room.name;
@@ -529,16 +495,13 @@ function renderRecentLogs(logs) {
             }
             row.appendChild(roomCell);
 
-            // Result cell
             const resultCell = document.createElement('td');
             const badgeSpan = document.createElement('span');
             badgeSpan.className = log.access_result === 'granted' ? 'badge badge-success' : 'badge badge-error';
             badgeSpan.textContent = log.access_result === 'granted' ? 'Engedélyezve' : 'Megtagadva';
             resultCell.appendChild(badgeSpan);
 
-            // Ha megtagadva, akkor az indokot tooltip-ben megjelenítjük
             if (log.access_result === 'denied' && log.denial_reason) {
-                // Info ikon hozzáadása
                 const infoIcon = document.createElement('span');
                 infoIcon.className = 'info-icon';
                 infoIcon.innerHTML = 'i';
@@ -548,7 +511,6 @@ function renderRecentLogs(logs) {
 
             row.appendChild(resultCell);
 
-            // Add the completed row to the table
             recentLogsTable.appendChild(row);
 
         } catch (error) {
@@ -556,9 +518,7 @@ function renderRecentLogs(logs) {
         }
     });
 
-    // Scrollbar megjelenítés ellenőrzése - ez után a renderelés után azonnal és egy kis késleltetéssel is
     checkScrollbars();
-    // Késleltetett ellenőrzés, hogy biztosan minden adat betöltődjön
     setTimeout(checkScrollbars, 100);
 }
 
@@ -581,7 +541,16 @@ function hideModal() {
     modalBody.innerHTML = '';
 }
 
-// Card registration has been moved to card_management.js
+function showCardManagementModal(e) {
+    e.preventDefault();
+    alert('A kártyakezelő funkció jelenleg fejlesztés alatt áll.');
+}
+
+function showGroupManagementModal(e) {
+    e.preventDefault();
+    alert('A csoportkezelő funkció jelenleg fejlesztés alatt áll.');
+}
+
 
 function showUserManagementModal(e) {
     e.preventDefault();
@@ -644,7 +613,6 @@ function showUserManagementModal(e) {
             });
         });
 
-        // Keresés beállítása
         const searchInput = document.getElementById('user-search');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -671,20 +639,17 @@ function showUserManagementModal(e) {
 
                     if (isVisible) hasVisibleRows = true;
 
-                    // Ha nincs keresési szöveg, visszaállítjuk az eredeti szöveget
                     if (searchText === '') {
                         nameCell.innerHTML = nameCell.textContent;
                         usernameCell.innerHTML = usernameCell.textContent;
                         emailCell.innerHTML = emailCell.textContent;
                     } else {
-                        // Kiemeljük a keresett szöveget
                         nameCell.innerHTML = highlightText(nameCell.textContent, searchText);
                         usernameCell.innerHTML = highlightText(usernameCell.textContent, searchText);
                         emailCell.innerHTML = highlightText(emailCell.textContent, searchText);
                     }
                 });
 
-                // Nincs találat üzenet megjelenítése
                 let noResultsMessage = table.parentNode.querySelector('.no-results');
                 if (!hasVisibleRows && searchText !== '') {
                     if (!noResultsMessage) {
@@ -698,7 +663,6 @@ function showUserManagementModal(e) {
                     noResultsMessage.style.display = 'none';
                 }
 
-                // Scrollbar ellenőrzése a keresés után
                 setTimeout(checkScrollbars, 50);
             });
         }
@@ -706,7 +670,6 @@ function showUserManagementModal(e) {
 }
 
 async function showAddUserForm() {
-    // Fetch groups for dropdowns
     await fetchGroups();
     await fetchRooms();
 
@@ -796,19 +759,16 @@ async function showAddUserForm() {
         const isAdmin = document.getElementById('is-admin').checked;
         const isActive = document.getElementById('is-active').checked;
 
-        // Csoportok összegyűjtése
         const selectedGroups = [];
         document.querySelectorAll('#group-checkboxes input[type="checkbox"]:checked').forEach(checkbox => {
             selectedGroups.push(parseInt(checkbox.value));
         });
 
-        // Helyiségek összegyűjtése
         const selectedRooms = [];
         document.querySelectorAll('#room-checkboxes input[type="checkbox"]:checked').forEach(checkbox => {
             selectedRooms.push(parseInt(checkbox.value));
         });
 
-        // Részletesebb hibaellenőrzés
         if (!firstName) {
             alert('Kérjük, adja meg a keresztnevet!');
             return;
@@ -829,31 +789,26 @@ async function showAddUserForm() {
             return;
         }
 
-        // Erősebb jelszó követelmények ellenőrzése
         if (password.length < 8) {
             alert('A jelszónak legalább 8 karakter hosszúnak kell lennie!');
             return;
         }
 
-        // Ellenőrizzük, hogy tartalmaz-e nagybetűt
         if (!/[A-Z]/.test(password)) {
             alert('A jelszónak tartalmaznia kell legalább egy nagybetűt!');
             return;
         }
 
-        // Ellenőrizzük, hogy tartalmaz-e kisbetűt
         if (!/[a-z]/.test(password)) {
             alert('A jelszónak tartalmaznia kell legalább egy kisbetűt!');
             return;
         }
 
-        // Ellenőrizzük, hogy tartalmaz-e számot
         if (!/[0-9]/.test(password)) {
             alert('A jelszónak tartalmaznia kell legalább egy számot!');
             return;
         }
 
-        // Ellenőrizzük, hogy tartalmaz-e speciális karaktert
         if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
             alert('A jelszónak tartalmaznia kell legalább egy speciális karaktert (pl. !@#$%^&*)!');
             return;
@@ -864,7 +819,6 @@ async function showAddUserForm() {
             return;
         }
 
-        // Email formátum ellenőrzése
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             alert('Kérjük, adjon meg egy érvényes email címet!');
@@ -872,7 +826,6 @@ async function showAddUserForm() {
         }
 
         try {
-            // Felhasználó létrehozása
             const userResponse = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
@@ -898,7 +851,6 @@ async function showAddUserForm() {
             const newUser = await userResponse.json();
             const userId = newUser.id;
 
-            // Csoporttagságok létrehozása
             const groupPromises = selectedGroups.map(groupId =>
                 fetch(`/api/groups/${groupId}/users`, {
                     method: 'POST',
@@ -912,7 +864,6 @@ async function showAddUserForm() {
                 })
             );
 
-            // Helyiség jogosultságok létrehozása
             const roomPromises = selectedRooms.map(roomId =>
                 fetch('/api/permissions', {
                     method: 'POST',
@@ -929,13 +880,11 @@ async function showAddUserForm() {
                 })
             );
 
-            // Várjuk meg az összes művelet befejezését
             await Promise.all([...groupPromises, ...roomPromises]);
 
             alert('Felhasználó sikeresen létrehozva!');
             hideModal();
 
-            // Várjuk meg az adatok frissítését, majd frissítsük a felhasználókezelő felületet
             await fetchUsers();
             showUserManagementModal(new Event('click'));
         } catch (error) {
@@ -948,7 +897,6 @@ async function showAddUserForm() {
 
 async function showEditUserForm(userId) {
     try {
-        // Betöltjük a felhasználó adatait
         const userResponse = await fetch(`/api/users/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -961,11 +909,9 @@ async function showEditUserForm(userId) {
 
         const user = await userResponse.json();
 
-        // Betöltjük a csoportokat és szobákat
         await fetchGroups();
         await fetchRooms();
 
-        // Lekérjük a felhasználó csoportjait
         const userGroupsResponse = await fetch(`/api/users/${userId}?include_groups=true`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -978,7 +924,6 @@ async function showEditUserForm(userId) {
             userGroups = userData.groups || [];
         }
 
-        // Lekérjük a felhasználó közvetlen helyiség jogosultságait
         const userPermissionsResponse = await fetch(`/api/permissions?user_id=${userId}&type=user`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -990,7 +935,6 @@ async function showEditUserForm(userId) {
             userPermissions = await userPermissionsResponse.json();
         }
 
-        // A felhasználó közvetlen helyiség hozzáférései
         const userRoomIds = userPermissions.map(perm => perm.room_id);
 
         const userForm = `
@@ -1075,19 +1019,16 @@ async function showEditUserForm(userId) {
             const isAdmin = document.getElementById('edit-is-admin').checked;
             const active = document.getElementById('edit-active').checked;
 
-            // Csoportok összegyűjtése
             const selectedGroups = [];
             document.querySelectorAll('#group-checkboxes input[type="checkbox"]:checked').forEach(checkbox => {
                 selectedGroups.push(parseInt(checkbox.value));
             });
 
-            // Helyiségek összegyűjtése
             const selectedRooms = [];
             document.querySelectorAll('#room-checkboxes input[type="checkbox"]:checked').forEach(checkbox => {
                 selectedRooms.push(parseInt(checkbox.value));
             });
 
-            // Részletesebb hibaellenőrzés
             if (!username) {
                 alert('Kérjük, adja meg a felhasználónevet!');
                 return;
@@ -1108,7 +1049,6 @@ async function showEditUserForm(userId) {
                 return;
             }
 
-            // Email formátum ellenőrzése
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 alert('Kérjük, adjon meg egy érvényes email címet!');
@@ -1129,7 +1069,6 @@ async function showEditUserForm(userId) {
             }
 
             try {
-                // Felhasználó frissítése
                 const response = await fetch(`/api/users/${userId}`, {
                     method: 'PUT',
                     headers: {
@@ -1144,8 +1083,6 @@ async function showEditUserForm(userId) {
                     throw new Error(errorData.error || 'Nem sikerült a felhasználó frissítése');
                 }
 
-                // Meglévő csoporttagságok kezelése
-                // Törölni a régi csoporttagságokat, amelyek nincsenek a kiválasztottak között
                 const groupsToRemove = userGroups.filter(g => !selectedGroups.includes(g.id));
                 const groupRemovePromises = groupsToRemove.map(group =>
                     fetch(`/api/groups/${group.id}/users/${userId}`, {
@@ -1156,7 +1093,6 @@ async function showEditUserForm(userId) {
                     })
                 );
 
-                // Új csoporttagságok hozzáadása
                 const existingGroupIds = userGroups.map(g => g.id);
                 const groupsToAdd = selectedGroups.filter(groupId => !existingGroupIds.includes(groupId));
                 const groupAddPromises = groupsToAdd.map(groupId =>
@@ -1172,8 +1108,6 @@ async function showEditUserForm(userId) {
                     })
                 );
 
-                // Meglévő közvetlen helyiség jogosultságok kezelése
-                // Először inaktiváljuk a régi jogosultságokat, amelyek nincsenek a kiválasztottak között
                 const roomsToRemove = userRoomIds.filter(roomId => !selectedRooms.includes(roomId));
                 const userPermissionsToRevoke = userPermissions.filter(perm => roomsToRemove.includes(perm.room_id));
                 const permissionRevokePromises = userPermissionsToRevoke.map(perm =>
@@ -1185,7 +1119,6 @@ async function showEditUserForm(userId) {
                     })
                 );
 
-                // Új helyiség jogosultságok hozzáadása
                 const roomsToAdd = selectedRooms.filter(roomId => !userRoomIds.includes(roomId));
                 const permissionAddPromises = roomsToAdd.map(roomId =>
                     fetch('/api/permissions', {
@@ -1203,7 +1136,6 @@ async function showEditUserForm(userId) {
                     })
                 );
 
-                // Várjuk meg az összes művelet befejezését
                 await Promise.all([
                     ...groupRemovePromises,
                     ...groupAddPromises,
@@ -1214,7 +1146,6 @@ async function showEditUserForm(userId) {
                 alert('Felhasználó sikeresen frissítve!');
                 hideModal();
 
-                // Frissítsük a felhasználók listáját
                 await fetchUsers();
                 showUserManagementModal(new Event('click'));
             } catch (error) {
@@ -1244,7 +1175,6 @@ async function deleteUser(userId) {
 
         alert('Felhasználó sikeresen törölve!');
 
-        // Frissítsük a felhasználók listáját
         await fetchUsers();
         showUserManagementModal(new Event('click'));
     } catch (error) {
@@ -1321,7 +1251,6 @@ function showRoomManagementModal(e) {
             });
         });
 
-        // Keresés beállítása
         const searchInput = document.getElementById('room-search');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -1348,20 +1277,17 @@ function showRoomManagementModal(e) {
 
                     if (isVisible) hasVisibleRows = true;
 
-                    // Ha nincs keresési szöveg, visszaállítjuk az eredeti szöveget
                     if (searchText === '') {
                         nameCell.innerHTML = nameCell.textContent;
                         buildingCell.innerHTML = buildingCell.textContent;
                         roomNumberCell.innerHTML = roomNumberCell.textContent;
                     } else {
-                        // Kiemeljük a keresett szöveget
                         nameCell.innerHTML = highlightText(nameCell.textContent, searchText);
                         buildingCell.innerHTML = highlightText(buildingCell.textContent, searchText);
                         roomNumberCell.innerHTML = highlightText(roomNumberCell.textContent, searchText);
                     }
                 });
 
-                // Nincs találat üzenet megjelenítése
                 let noResultsMessage = table.parentNode.querySelector('.no-results');
                 if (!hasVisibleRows && searchText !== '') {
                     if (!noResultsMessage) {
@@ -1375,7 +1301,6 @@ function showRoomManagementModal(e) {
                     noResultsMessage.style.display = 'none';
                 }
 
-                // Scrollbar ellenőrzése a keresés után
                 setTimeout(checkScrollbars, 50);
             });
         }
@@ -1434,7 +1359,6 @@ function showAddRoomForm() {
         const operatingHours = document.getElementById('operating-hours').value;
         const operatingDays = document.getElementById('operating-days').value;
 
-        // Részletesebb hibaellenőrzés
         if (!name) {
             alert('Kérjük, adja meg a helyiség nevét!');
             return;
@@ -1551,7 +1475,6 @@ async function showEditRoomForm(roomId) {
             const operatingHours = document.getElementById('operating-hours').value;
             const operatingDays = document.getElementById('operating-days').value;
 
-            // Részletesebb hibaellenőrzés
             if (!name) {
                 alert('Kérjük, adja meg a helyiség nevét!');
                 return;
@@ -1796,7 +1719,6 @@ function showLogsModal(e) {
     setTimeout(() => {
         document.getElementById('apply-filters-btn').addEventListener('click', fetchFilteredLogs);
 
-        // Keresés a naplóban
         const searchInput = document.getElementById('log-search');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -1808,7 +1730,6 @@ function showLogsModal(e) {
                 let hasVisibleRows = false;
 
                 rows.forEach(row => {
-                    // Kihagyjuk a "Nincs adat" sort
                     if (row.querySelector('td[colspan]')) {
                         return;
                     }
@@ -1817,17 +1738,14 @@ function showLogsModal(e) {
                     let rowVisible = false;
 
                     cells.forEach(cell => {
-                        // Az eredmény cellában a badge-et kihagyjuk
                         const cellText = cell.textContent.toLowerCase();
                         if (cellText.includes(searchText)) {
                             rowVisible = true;
                         }
 
-                        // Visszaállítjuk/kiemeljük a szöveget
                         if (searchText === '') {
                             cell.innerHTML = cell.textContent;
                         } else {
-                            // Az eredmény oszlopnál megtartjuk a badge-et
                             if (cell.querySelector('.badge')) {
                                 const badge = cell.querySelector('.badge').outerHTML;
                                 const textContent = cell.textContent;
@@ -1842,7 +1760,6 @@ function showLogsModal(e) {
                     if (rowVisible || searchText === '') hasVisibleRows = true;
                 });
 
-                // Nincs találat üzenet kezelése
                 const table = document.getElementById('logs-table');
                 let noResultsMessage = table.parentNode.querySelector('.no-results');
 
@@ -1858,7 +1775,6 @@ function showLogsModal(e) {
                     noResultsMessage.style.display = 'none';
                 }
 
-                // Scrollbar ellenőrzése a keresés után
                 setTimeout(checkScrollbars, 50);
             });
         }
@@ -1937,13 +1853,11 @@ async function fetchFilteredLogs() {
             logsTableBody.appendChild(row);
         });
 
-        // Töröljük a keresőmezőt és ellenőrizzük a scrollbarokat
         const searchInput = document.getElementById('log-search');
         if (searchInput) {
             searchInput.value = '';
         }
 
-        // Scrollbar ellenőrzése
         setTimeout(checkScrollbars, 50);
 
     } catch (error) {
@@ -1966,13 +1880,11 @@ function translateAccessLevel(level) {
     const levels = {
         'public': 'Nyilvános',
         'restricted': 'Engedéllyel',
-        'admin': 'Adminisztrátor' // Kept for backward compatibility
     };
 
     return levels[level] || level;
 }
 
-// Lejáró kártyák lekérése
 async function fetchExpiringCards() {
     try {
         const response = await fetch('/api/cards/expiring', {
@@ -1992,29 +1904,23 @@ async function fetchExpiringCards() {
     }
 }
 
-// Lejáró kártyák megjelenítése a dashboard-on
 function renderExpiringCards(cards) {
     const expiringCardsContainer = document.getElementById('expiring-cards-container');
 
-    // Ha nem létezik a konténer, ne csinálj semmit
     if (!expiringCardsContainer) {
         console.error('Lejáró kártyák konténer nem található');
         return;
     }
 
-    // Töröljük a meglévő tartalmat
     expiringCardsContainer.innerHTML = '';
 
-    // Ha nincs lejáró kártya, jelezzük
     if (!cards || cards.length === 0) {
         expiringCardsContainer.innerHTML = '<p class="info-message">Nincsenek hamarosan lejáró kártyák</p>';
         return;
     }
 
-    // Rendezzük a kártyákat a lejárat dátuma szerint
     cards.sort((a, b) => new Date(a.expiry_date) - new Date(b.expiry_date));
 
-    // Táblázatos formátum létrehozása
     const tableHtml = `
         <div class="table-responsive">
             <table id="expiring-cards-table">
@@ -2034,7 +1940,6 @@ function renderExpiringCards(cards) {
                         const daysRemaining = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
                         const userName = card.user ? `${card.user.first_name} ${card.user.last_name}` : 'Ismeretlen';
 
-                        // Osztályozás a hátralévő napok száma alapján
                         let rowClass = '';
                         if (daysRemaining <= 7) {
                             rowClass = 'urgent-row';
@@ -2059,7 +1964,6 @@ function renderExpiringCards(cards) {
 
     expiringCardsContainer.innerHTML = tableHtml;
 
-    // Event listener-ek hozzáadása a gombokhoz és scrollbar ellenőrzése
     setTimeout(() => {
         document.querySelectorAll('.extend-card').forEach(button => {
             button.addEventListener('click', () => {
@@ -2068,15 +1972,12 @@ function renderExpiringCards(cards) {
             });
         });
 
-        // Megjelenítés után ellenőrizzük a scrollbarokat
         checkScrollbars();
     }, 50);
 }
 
-// Kártya hosszabbítás űrlap megjelenítése
 async function showExtendCardForm(cardId) {
     try {
-        // Kártya adatainak betöltése
         const response = await fetch(`/api/cards/${cardId}`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -2090,11 +1991,9 @@ async function showExtendCardForm(cardId) {
         const card = await response.json();
         const currentExpiry = card.expiry_date ? new Date(card.expiry_date) : new Date();
 
-        // Alapértelmezett új lejárat: 1 év a mostani dátumtól
         const defaultNewExpiry = new Date();
         defaultNewExpiry.setFullYear(defaultNewExpiry.getFullYear() + 1);
 
-        // Formátum konverzió az input mezőhöz (YYYY-MM-DD)
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -2177,7 +2076,6 @@ async function showExtendCardForm(cardId) {
                 alert('Kártya sikeresen hosszabbítva!');
                 hideModal();
 
-                // Frissítsük a kártyákat és a dashboard-ot
                 await Promise.all([
                     fetchCards(),
                     fetchExpiringCards()
@@ -2202,7 +2100,6 @@ function getBadgeClassForAccessLevel(level) {
     }
 }
 
-// Elutasítási indokok fordításai
 function getDenialReasonText(reason) {
     const reasons = {
         'no_permission': 'Nincs jogosultság a helyiséghez',
@@ -2218,7 +2115,6 @@ function getDenialReasonText(reason) {
     return reasons[reason] || reason || 'Ismeretlen ok';
 }
 
-// Szöveg kiemelő segédfüggvény a kereséshez
 function highlightText(text, searchQuery) {
     if (!searchQuery) return text;
 
@@ -2237,21 +2133,17 @@ function highlightText(text, searchQuery) {
     );
 }
 
-// Scrollbar megjelenítése csak ha szükséges
 function checkScrollbars() {
-    // Minden táblázat konténert ellenőrzünk
     document.querySelectorAll('.table-responsive').forEach(container => {
         const table = container.querySelector('table');
         if (!table) return;
 
-        // Ha a táblázat magasabb, mint a konténer, akkor szükség van scrollbarra
         if (table.offsetHeight > container.offsetHeight) {
             container.classList.add('needs-scroll');
         } else {
             container.classList.remove('needs-scroll');
         }
 
-        // Ha a táblázat szélesebb, mint a konténer, akkor vízszintes scrollbarra van szükség
         if (table.offsetWidth > container.offsetWidth) {
             container.classList.add('needs-scroll-x');
         } else {
@@ -2260,12 +2152,9 @@ function checkScrollbars() {
     });
 }
 
-// Jelszóerősség ellenőrzése és megjelenítése
 function checkPasswordStrength(password) {
-    // Alap pontszám
     let score = 0;
 
-    // Ha üres, nincs pontszám
     if (password.length === 0) {
         return {
             score: 0,
@@ -2273,29 +2162,22 @@ function checkPasswordStrength(password) {
         };
     }
 
-    // Hossz alapján pontok
     if (password.length >= 8) score += 1;
     if (password.length >= 10) score += 1;
     if (password.length >= 12) score += 1;
 
-    // Tartalmaz számot
     if (/[0-9]/.test(password)) score += 1;
 
-    // Tartalmaz kisbetűt
     if (/[a-z]/.test(password)) score += 1;
 
-    // Tartalmaz nagybetűt
     if (/[A-Z]/.test(password)) score += 1;
 
-    // Tartalmaz speciális karaktert
     if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 1;
 
-    // Különböző karakterek száma
     const uniqueChars = new Set(password.split('')).size;
     if (uniqueChars >= 5) score += 1;
     if (uniqueChars >= 8) score += 1;
 
-    // Erősség szöveg és osztály meghatározása
     let text, strengthClass;
 
     if (score < 3) {
@@ -2368,7 +2250,6 @@ function showProfileModal() {
         const password = document.getElementById('profile-password').value;
         const passwordConfirm = document.getElementById('profile-password-confirm').value;
 
-        // Validáció
         if (!firstName) {
             alert('Kérjük, adja meg a keresztnevét!');
             return;
@@ -2384,55 +2265,45 @@ function showProfileModal() {
             return;
         }
 
-        // Email formátum ellenőrzése
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             alert('Kérjük, adjon meg egy érvényes email címet!');
             return;
         }
 
-        // Jelszóváltoztatás külön kezelése
         const currentPassword = document.getElementById('profile-current-password').value;
 
-        // Ha jelszóváltoztatást kért a felhasználó
         if (password || currentPassword) {
-            // Ellenőrizzük, hogy megadta-e a jelenlegi jelszavát
             if (!currentPassword) {
                 alert('Jelszó módosításához meg kell adnia a jelenlegi jelszavát!');
                 return;
             }
 
-            // Ellenőrizzük, hogy megadta-e az új jelszót
             if (!password) {
                 alert('Kérjük, adja meg az új jelszót!');
                 return;
             }
 
-            // Erősebb jelszó követelmények ellenőrzése
             if (password.length < 8) {
                 alert('A jelszónak legalább 8 karakter hosszúnak kell lennie!');
                 return;
             }
 
-            // Ellenőrizzük, hogy tartalmaz-e nagybetűt
             if (!/[A-Z]/.test(password)) {
                 alert('A jelszónak tartalmaznia kell legalább egy nagybetűt!');
                 return;
             }
 
-            // Ellenőrizzük, hogy tartalmaz-e kisbetűt
             if (!/[a-z]/.test(password)) {
                 alert('A jelszónak tartalmaznia kell legalább egy kisbetűt!');
                 return;
             }
 
-            // Ellenőrizzük, hogy tartalmaz-e számot
             if (!/[0-9]/.test(password)) {
                 alert('A jelszónak tartalmaznia kell legalább egy számot!');
                 return;
             }
 
-            // Ellenőrizzük, hogy tartalmaz-e speciális karaktert
             if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
                 alert('A jelszónak tartalmaznia kell legalább egy speciális karaktert (pl. !@#$%^&*)!');
                 return;
@@ -2444,19 +2315,16 @@ function showProfileModal() {
             }
         }
 
-        // Adatok összeállítása
         const userData = {
             first_name: firstName,
             last_name: lastName,
             email: email
         };
 
-        // Jelszóváltoztatás kezelése
         let passwordChanged = false;
 
         if (password && currentPassword) {
             try {
-                // Először ellenőrizzük a jelenlegi jelszót és változtatjuk meg a jelszót
                 const passwordResponse = await fetch('/api/auth/change-password', {
                     method: 'POST',
                     headers: {
@@ -2470,7 +2338,6 @@ function showProfileModal() {
                 });
 
                 if (!passwordResponse.ok) {
-                    // Ha hibakóddal jön vissza, valószínűleg rossz a jelenlegi jelszó
                     if (passwordResponse.status === 401) {
                         alert('A megadott jelenlegi jelszó helytelen!');
                         return;
@@ -2502,14 +2369,11 @@ function showProfileModal() {
                 throw new Error(errorData.error || 'Profil frissítése sikertelen');
             }
 
-            // Frissítsük a felhasználói adatokat
             const updatedUser = await response.json();
             currentUser = updatedUser;
 
-            // Frissítsük a navigációt, hogy az új név megjelenjen
             updateAuthNav(true);
 
-            // A megfelelő sikerüzenet megjelenítése
             if (passwordChanged) {
                 alert('Profil sikeresen frissítve, és a jelszó megváltoztatva!');
             } else {
@@ -2523,7 +2387,6 @@ function showProfileModal() {
 
     showModal('Profilom szerkesztése', profileForm, handleSaveProfile);
 
-    // Jelszóerősség sáv kezelése
     setTimeout(() => {
         const passwordInput = document.getElementById('profile-password');
         const strengthBar = document.getElementById('password-strength-bar');
@@ -2533,15 +2396,12 @@ function showProfileModal() {
             const password = this.value;
             const strength = checkPasswordStrength(password);
 
-            // Eltávolítjuk az összes erősség osztályt
             strengthBar.classList.remove('very-weak', 'weak', 'medium', 'strong', 'very-strong');
 
             if (password.length > 0) {
-                // Hozzáadjuk a megfelelő erősség osztályt
                 strengthBar.classList.add(strength.strengthClass);
             }
 
-            // Frissítjük a jelszó erősség szövegét
             strengthText.textContent = `Jelszóerősség: ${strength.text}`;
         });
     }, 0);
@@ -2550,7 +2410,6 @@ function showProfileModal() {
 function showSimulationModal(e) {
     e.preventDefault();
 
-    // Build form for simulation
     const simulationContent = `
         <div class="simulation-container">
             <div class="sim-description mb-lg">
@@ -2603,7 +2462,6 @@ function showSimulationModal(e) {
 
     showModal('Belépési szimuláció', simulationContent);
 
-    // Set up event handlers
     setTimeout(() => {
         document.getElementById('run-simulation-btn').addEventListener('click', runAccessSimulation);
     }, 0);
@@ -2626,7 +2484,6 @@ async function runAccessSimulation() {
             throw new Error('Érvénytelen kártya vagy helyiség kiválasztva');
         }
 
-        // Call the API to simulate access
         const response = await fetch('/api/simulate/access', {
             method: 'POST',
             headers: {
@@ -2641,7 +2498,6 @@ async function runAccessSimulation() {
 
         const result = await response.json();
 
-        // Display the result
         const resultContainer = document.getElementById('sim-result');
         const resultContent = document.getElementById('sim-result-content');
 
@@ -2688,11 +2544,9 @@ async function runAccessSimulation() {
             </div>
         `;
 
-        // Add animation effect
         const resultCard = resultContent.querySelector('.sim-result-card');
         resultCard.classList.add('animate-in');
 
-        // Update the recent logs table
         await fetchRecentLogs();
 
     } catch (error) {

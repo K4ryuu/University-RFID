@@ -1,7 +1,3 @@
-/* Professional Corporate RFID Management System Styles
-   Designed for enterprise environments with usability focus */
-
-/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -9,7 +5,6 @@
 }
 
 :root {
-    /* Color scheme - professional blue palette */
     --primary: #1a73e8;
     --primary-dark: #0d47a1;
     --primary-light: #e8f0fe;
@@ -22,13 +17,12 @@
     --surface: #ffffff;
     --border: #dadce0;
     --error: #d93025;
-    --error-rgb: 217, 48, 37; /* RGB values for --error */
+    --error-rgb: 217, 48, 37;
     --success: #0f9d58;
-    --success-rgb: 15, 157, 88; /* RGB values for --success */
+    --success-rgb: 15, 157, 88;
     --warning: #f29900;
-    --warning-rgb: 242, 153, 0; /* RGB values for --warning */
+    --warning-rgb: 242, 153, 0;
 
-    /* Spacing units */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
@@ -36,17 +30,14 @@
     --spacing-xl: 2rem;
     --spacing-xxl: 3rem;
 
-    /* Shadow levels */
     --shadow-sm: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
     --shadow-md: 0 2px 6px rgba(60, 64, 67, 0.3), 0 1px 8px 1px rgba(60, 64, 67, 0.15);
     --shadow-lg: 0 4px 12px rgba(60, 64, 67, 0.3), 0 1px 16px 1px rgba(60, 64, 67, 0.15);
 
-    /* Border radius */
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
 
-    /* Transition speed */
     --transition-fast: 150ms;
     --transition-normal: 250ms;
     --transition-slow: 350ms;
@@ -72,7 +63,6 @@ body {
     min-height: 100vh;
 }
 
-/* Typography */
 h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
     line-height: 1.3;
@@ -110,7 +100,6 @@ p {
     margin-bottom: var(--spacing-md);
 }
 
-/* Header and navigation */
 header {
     background-color: var(--primary);
     color: white;
@@ -164,7 +153,6 @@ nav {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Main content */
 main {
     flex: 1;
     max-width: 1280px;
@@ -173,7 +161,6 @@ main {
     width: 100%;
 }
 
-/* Login form */
 #login-container {
     max-width: 420px;
     margin: var(--spacing-xxl) auto;
@@ -292,7 +279,6 @@ button[type="submit"] {
     font-weight: 500;
 }
 
-/* Dashboard */
 .dashboard-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -329,7 +315,6 @@ button[type="submit"] {
     margin: 0;
 }
 
-/* Quick actions */
 .quick-actions {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -364,46 +349,38 @@ button[type="submit"] {
     transform: translateY(0);
 }
 
-/* Tables */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    margin-bottom: var(--spacing-md); /* Ugyanannyi hely a táblázat alatt, mint felette */
-    max-height: 750px; /* Megnövelt maximális magasság, hogy több sor látszódjon */
-    overflow-y: auto; /* Y tengely mentén scrollozható, ha szükséges */
-    scroll-behavior: smooth; /* Sima scrollozás animáció */
-    scrollbar-gutter: stable; /* Stabilizálja az elrendezést, hogy ne ugráljon a tartalom */
-    /* Alapértelmezetten elrejtett scrollbar, csak a JavaScriptben hozzáadott needs-scroll osztály jelenti meg */
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    margin-bottom: var(--spacing-md);
+    max-height: 750px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-/* Scrollbar stílusok - csak akkor jelennek meg, ha szükségesek */
 .table-responsive::-webkit-scrollbar {
     width: 8px;
     height: 8px;
-    display: none; /* Alapértelmezetten elrejtve */
+    display: none;
 }
 
-/* Függőleges scrollbar csak akkor jelenik meg, ha szükséges */
 .table-responsive.needs-scroll::-webkit-scrollbar {
     display: block;
 }
 
-/* Vízszintes scrollbar csak akkor jelenik meg, ha szükséges */
 .table-responsive.needs-scroll-x::-webkit-scrollbar-horizontal,
 .table-responsive.needs-scroll-x::-webkit-scrollbar {
     display: block;
 }
 
-/* Mindenhol rejtett scrollbar, ha nincs .needs-scroll osztály */
 .table-responsive:not(.needs-scroll):not(.needs-scroll-x)::-webkit-scrollbar {
     display: none !important;
 }
 
-/* Biztosítsuk, hogy a scrollbars megjelenése ne okozzon ugrálást */
 .table-responsive {
-    /* ez a css tulajdonság stabilizálja a layoutot */
     scrollbar-gutter: stable;
 }
 
@@ -428,7 +405,7 @@ table {
     background-color: var(--surface);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    margin-bottom: 0; /* Nincs margó a táblázat alatt */
+    margin-bottom: 0;
     table-layout: auto;
 }
 
@@ -438,7 +415,6 @@ table td.actions {
     white-space: nowrap;
 }
 
-/* Táblázatban lévő gombok egységes stílusa */
 table td button {
     margin-right: var(--spacing-sm);
     margin-bottom: var(--spacing-xs);
@@ -453,7 +429,7 @@ th, td {
     min-width: 120px;
     white-space: normal;
     word-wrap: break-word;
-    height: 4rem; /* Nagyobb sormagasság mindkét táblázatban */
+    height: 4rem;
 }
 
 th {
@@ -466,8 +442,8 @@ th {
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    z-index: 10; /* Biztosítja, hogy a fejléc a tartalom fölött maradjon scrollozáskor */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Árnyék a fejléc alján a scrollozáskor */
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 tr:not(:last-child) td {
@@ -488,7 +464,6 @@ tr:hover td {
     font-weight: 500;
 }
 
-/* Management section styles */
 .management-actions {
     display: flex;
     justify-content: space-between;
@@ -502,7 +477,6 @@ tr:hover td {
     margin-right: var(--spacing-sm);
 }
 
-/* Search box styles */
 .search-container {
     position: relative;
     flex: 1;
@@ -512,7 +486,7 @@ tr:hover td {
 .search-input {
     width: 100%;
     padding: var(--spacing-sm) var(--spacing-md);
-    padding-left: calc(var(--spacing-md) + 20px); /* Space for search icon */
+    padding-left: calc(var(--spacing-md) + 20px);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     font-size: 0.9rem;
@@ -534,13 +508,11 @@ tr:hover td {
     font-size: 0.9rem;
 }
 
-/* Highlighted text in search results */
 .highlight {
     background-color: rgba(var(--warning-rgb), 0.3);
     padding: 0 2px;
 }
 
-/* No results message */
 .no-results {
     padding: var(--spacing-md);
     text-align: center;
@@ -548,7 +520,6 @@ tr:hover td {
     font-style: italic;
 }
 
-/* Footer */
 footer {
     background-color: var(--text-light);
     color: white;
@@ -557,7 +528,6 @@ footer {
     margin-top: auto;
 }
 
-/* Modal */
 .modal-hidden {
     display: none;
 }
@@ -658,7 +628,6 @@ footer {
     z-index: 1;
 }
 
-/* Form utility classes */
 .form-row {
     display: flex;
     gap: var(--spacing-md);
@@ -682,7 +651,6 @@ footer {
     margin-top: var(--spacing-xs);
 }
 
-/* Card components */
 .card {
     background-color: var(--surface);
     border-radius: var(--radius-md);
@@ -691,7 +659,6 @@ footer {
     margin-bottom: var(--spacing-md);
 }
 
-/* Egységes belső padding a card elemben */
 .dashboard-section .card {
     padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) var(--spacing-md);
 }
@@ -709,7 +676,6 @@ footer {
     margin: 0;
 }
 
-/* Badge component */
 .badge {
     display: inline-block;
     padding: var(--spacing-xs) var(--spacing-sm);
@@ -745,7 +711,6 @@ footer {
     color: var(--text-light);
 }
 
-/* Dashboard sections layout */
 .dashboard-sections {
     display: flex;
     flex-direction: column;
@@ -756,7 +721,6 @@ footer {
     width: 100%;
 }
 
-/* Expiring cards styling - compact version */
 .expiring-cards-container {
     padding: 0;
 }
@@ -789,7 +753,6 @@ footer {
     border-left: 3px solid var(--error);
 }
 
-/* Sürgős sor kiemelése a táblázatban */
 .urgent-row {
     background-color: rgba(var(--error-rgb), 0.05) !important;
 }
@@ -798,7 +761,6 @@ footer {
     border-left: 3px solid var(--error);
 }
 
-/* Figyelmeztető sor kiemelése a táblázatban */
 .warning-row {
     background-color: rgba(var(--warning-rgb), 0.05) !important;
 }
@@ -807,7 +769,6 @@ footer {
     border-left: 3px solid var(--warning);
 }
 
-/* Megtagadott belépés kiemelése */
 .denied-row {
     background-color: rgba(var(--error-rgb), 0.05) !important;
 }
@@ -816,7 +777,6 @@ footer {
     border-left: 3px solid var(--error);
 }
 
-/* Engedélyezett belépés kiemelése */
 .granted-row {
     background-color: rgba(var(--success-rgb), 0.05) !important;
 }
@@ -912,7 +872,6 @@ footer {
     padding: 1rem;
 }
 
-/* Információs ikon a tooltiphez */
 .info-icon {
     display: inline-flex;
     align-items: center;
@@ -930,8 +889,6 @@ footer {
     color: var(--primary-dark);
 }
 
-/* Tooltip stílusok eltávolítva - csak natív böngésző tooltip marad */
-
 @keyframes fadeIn {
     to { opacity: 1; }
 }
@@ -942,7 +899,6 @@ footer {
     }
 }
 
-/* Utility classes */
 .text-center {
     text-align: center;
 }
@@ -951,7 +907,6 @@ footer {
     text-align: right;
 }
 
-/* Jelszóerősség jelző stílusok */
 .password-strength-meter {
     height: 8px;
     background-color: var(--border);
@@ -1018,8 +973,6 @@ footer {
     margin-bottom: var(--spacing-xl);
 }
 
-/* Responsive adjustments */
-/* Tab navigation */
 .tabs {
     width: 100%;
     margin-bottom: var(--spacing-lg);
@@ -1127,7 +1080,6 @@ footer {
     }
 }
 
-/* Simulation interface styles */
 .simulation-container {
     width: 100%;
 }
@@ -1210,7 +1162,6 @@ footer {
     font-weight: 500;
 }
 
-/* Kártya hosszabbítás stílus */
 .extend-card-summary {
     margin-bottom: var(--spacing-md);
     background-color: var(--primary-light);
@@ -1269,7 +1220,6 @@ footer {
     }
 }
 
-/* Print styles */
 @media print {
     header, footer, .quick-actions, button {
         display: none;
