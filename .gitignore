@@ -1,0 +1,45 @@
+# Adatbázis fájlok
+*.db
+*.sqlite
+*.sqlite3
+
+# Környezeti változók
+.env
+
+# Build fájlok
+/rfid-server
+/bin/
+/build/
+
+# Go specifikus
+/vendor/
+/go.sum
+
+# Ideiglenes fájlok
+*.tmp
+*.bak
+*.swp
+*~
+
+# Rendszer fájlok
+.DS_Store
+Thumbs.db
+
+# IDE és szerkesztőprogramok
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logok
+*.log
+
+# Go lokális cache
+.go/
+
+# Go teszt lefedettség
+coverage.txt
+*.out
+
+# Go debug
+__debug_bin
