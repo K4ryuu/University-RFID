@@ -13,6 +13,7 @@ Az RFID Beléptető Rendszer egy olyan megoldás, amely:
 - Naplózza a belépési eseményeket
 - Csoportalapú hozzáférés-kezelést tesz lehetővé
 - Valós idejű monitorozást biztosít websocket kapcsolaton keresztül
+- Támogatja mind a RESTful API-n, mind a WebSocketen keresztül kommunikáló RFID olvasókat
 
 ## Képernyőképek
 
@@ -35,7 +36,7 @@ A projekt képernyőképei a `showcase` mappában találhatók, ahol 12 kép mut
 - **Frontend**: HTML, CSS, JavaScript
 - **Adatbázis**: Konfigurálható (alapértelmezetten SQLite)
 - **Biztonság**: JWT token alapú autentikáció, API-kulcs védelem
-- **RFID**: RFID olvasók integrációja
+- **RFID**: RESTful API és WebSocket alapú RFID olvasók integrációja
 
 ## Vizuális Dokumentáció
 
