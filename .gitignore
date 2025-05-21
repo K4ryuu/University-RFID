@@ -28,6 +28,7 @@ Thumbs.db
 # IDE és szerkesztőprogramok
 .idea/
 .vscode/
+
 # Logok
 *.log
 
