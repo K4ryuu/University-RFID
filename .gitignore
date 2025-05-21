@@ -28,19 +28,11 @@ Thumbs.db
 # IDE és szerkesztőprogramok
 .idea/
 .vscode/
-*.sublime-project
-*.sublime-workspace
-
 # Logok
 *.log
 
 # Go lokális cache
 .go/
 
-# Go teszt lefedettség
-coverage.txt
-*.out
-
 # Go debug
 __debug_bin
-**/.claude/settings.local.json
